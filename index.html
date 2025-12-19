@@ -51,7 +51,12 @@
   <a-scene embedded vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false;">
     
     <!-- Custom Marker -->
-    <a-marker type="pattern" url="marker.patt">
+    <a-marker
+  type="pattern"
+  url="./marker.patt"
+  emitevents="true"
+  cursor="rayOrigin: mouse"
+>
 
       <a-box
         id="box"
@@ -103,8 +108,8 @@
   </script>
   
 <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
+  //if ("serviceWorker" in navigator) {
+    //navigator.serviceWorker.register("sw.js");
   }
 </script>
 </body>

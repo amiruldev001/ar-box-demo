@@ -106,7 +106,19 @@
       box().setAttribute("scale", `${scale} ${scale} ${scale}`);
     }
   </script>
-  
+  <script>
+    // This must be **after the a-marker is in the DOM**
+    const marker = document.querySelector("a-marker");
+
+    marker.addEventListener("markerFound", () => {
+      console.log("✅ Marker detected");
+    });
+
+    marker.addEventListener("markerLost", () => {
+      console.log("❌ Marker lost");
+    });
+  </script>
+
 <script>
   //if ("serviceWorker" in navigator) {
     //navigator.serviceWorker.register("sw.js");

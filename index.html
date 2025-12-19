@@ -2,7 +2,8 @@
 <html>
 <head>
   <title>AR 3D Box Viewer</title>
-
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
@@ -94,6 +95,11 @@
       box().setAttribute("scale", `${scale} ${scale} ${scale}`);
     }
   </script>
-
+  
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+</script>
 </body>
 </html>

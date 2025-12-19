@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AR 3D Box Viewer</title>
+
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+
+    #panel {
+      position: fixed;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.75);
+      padding: 10px 15px;
+      border-radius: 12px;
+      display: flex;
+      gap: 10px;
+      z-index: 999;
+    }
+
+    button {
+      background: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #e0e0e0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    
+    <!-- Custom Marker -->
+    <a-marker type="pattern" url="marker.patt">
+
+      <a-box
+        id="box"
+        position="0 0.5 0"
+        scale="0.5 0.5 0.5"
+        color="#ff0000"
+      ></a-box>
+
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- UI PANEL -->
+  <div id="panel">
+    <button onclick="changeColor()">🎨 Color</button>
+    <button onclick="rotateBox()">🔄 Rotate</button>
+    <button onclick="scaleUp()">➕ Size</button>
+    <button onclick="scaleDown()">➖ Size</button>
+  </div>
+
+  <script>
+    const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+    let colorIndex = 0;
+    let rotation = 0;
+    let scale = 0.5;
+
+    const box = () => document.getElementById("box");
+
+    function changeColor() {
+      colorIndex = (colorIndex + 1) % colors.length;
+      box().setAttribute("color", colors[colorIndex]);
+    }
+
+    function rotateBox() {
+      rotation += 45;
+      box().setAttribute("rotation", `0 ${rotation} 0`);
+    }
+
+    function scaleUp() {
+      scale += 0.1;
+      box().setAttribute("scale", `${scale} ${scale} ${scale}`);
+    }
+
+    function scaleDown() {
+      if (scale > 0.2) scale -= 0.1;
+      box().setAttribute("scale", `${scale} ${scale} ${scale}`);
+    }
+  </script>
+
+</body>
+</html>

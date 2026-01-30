@@ -1,128 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>AR 3D Box Viewer</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <title>Komitmen Tracker</title>
   <style>
-    body { margin: 0; overflow: hidden; font-family: Arial, sans-serif;touch-action: none; }
-
-    #panel {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.75);
-      padding: 12px 16px;
-      border-radius: 14px;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f2f2f7;
+      margin: 0;
+      padding: 0;
       display: flex;
-      gap: 10px;
-      z-index: 9999;
+      justify-content: center;
+      min-height: 100vh;
     }
-    
 
-    button {
-      background: #ffffff;
+    .container {
+      background-color: #fff;
+      margin-top: 50px;
+      width: 95%;
+      max-width: 400px;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .add-item {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .add-item input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 15px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .add-item button {
+      margin-left: 10px;
+      padding: 10px 15px;
       border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 14px;
+      background-color: #007aff;
+      color: white;
+      border-radius: 15px;
       cursor: pointer;
-    }
-    @supports (padding: env(safe-area-inset-bottom)) {
-    #panel {
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      }
+      font-weight: bold;
+      transition: 0.2s;
     }
 
-    button:hover {
-      background: #e0e0e0;
+    .add-item button:hover {
+      background-color: #005bb5;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+      border-radius: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: #999;
+      background-color: #e0e0e0;
+    }
+
+    li button {
+      background: none;
+      border: none;
+      color: #ff3b30;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    li button:hover {
+      color: #b00020;
     }
   </style>
 </head>
-
 <body>
+  <div class="container">
+    <h1>Komitmen</h1>
 
-  <a-scene embedded vr-mode-ui="enabled: false" arjs="sourceType: webcam; debugUIEnabled: false;">
-    
-    <!-- Custom Marker -->
-    <a-marker
-  type="pattern"
-  url="./marker.patt"
-  emitevents="true"
-  cursor="rayOrigin: mouse"
->
+    <div class="add-item">
+      <input type="text" id="newItem" placeholder="Add new komitmen">
+      <button onclick="addItem()">Add</button>
+    </div>
 
-      <a-box
-        id="box"
-        position="0 0.5 0"
-        scale="0.5 0.5 0.5"
-        color="#ff0000"
-      ></a-box>
-
-    </a-marker>
-
-    <a-entity camera="fov: 70;"></a-entity>
-  </a-scene>
-
-  <!-- UI PANEL -->
-  <div id="panel">
-    <button onclick="changeColor()">🎨 Color</button>
-    <button onclick="rotateBox()">🔄 Rotate</button>
-    <button onclick="scaleUp()">➕ Size</button>
-    <button onclick="scaleDown()">➖ Size</button>
+    <ul id="komitmenList"></ul>
   </div>
 
   <script>
-    const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
-    let colorIndex = 0;
-    let rotation = 0;
-    let scale = 0.5;
+    // Default list if no saved data
+    const defaultKomitmen = [
+      { text: "sayang 150", completed: false },
+      { text: "api 57.90", completed: false },
+      { text: "coway 70", completed: false },
+      { text: "asb1 264", completed: false },
+      { text: "mama 150", completed: false },
+      { text: "ayah 150", completed: false },
+      { text: "adik 50", completed: false },
+      { text: "asb2 276", completed: false },
+      { text: "air 11.05", completed: false },
+      { text: "myvi 300", completed: false },
+      { text: "yns 200", completed: false },
+      { text: "Loan Rumah 1217", completed: false }
+    ];
 
-    const box = () => document.getElementById("box");
+    const listEl = document.getElementById('komitmenList');
 
-    function changeColor() {
-      colorIndex = (colorIndex + 1) % colors.length;
-      box().setAttribute("color", colors[colorIndex]);
+    // Load from localStorage or default
+    let komitmen = JSON.parse(localStorage.getItem('komitmen')) || defaultKomitmen;
+
+    function saveList() {
+      localStorage.setItem('komitmen', JSON.stringify(komitmen));
     }
 
-    function rotateBox() {
-      rotation += 45;
-      box().setAttribute("rotation", `0 ${rotation} 0`);
+    function renderList() {
+      listEl.innerHTML = '';
+      komitmen.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = item.completed ? 'completed' : '';
+        li.innerHTML = `${item.text} <button onclick="deleteItem(event, ${index})">✕</button>`;
+        li.onclick = () => toggleComplete(index);
+        listEl.appendChild(li);
+      });
     }
 
-    function scaleUp() {
-      scale += 0.1;
-      box().setAttribute("scale", `${scale} ${scale} ${scale}`);
+    function toggleComplete(index) {
+      komitmen[index].completed = !komitmen[index].completed;
+      saveList();
+      renderList();
     }
 
-    function scaleDown() {
-      if (scale > 0.2) scale -= 0.1;
-      box().setAttribute("scale", `${scale} ${scale} ${scale}`);
+    function deleteItem(event, index) {
+      event.stopPropagation();
+      komitmen.splice(index, 1);
+      saveList();
+      renderList();
     }
+
+    function addItem() {
+      const input = document.getElementById('newItem');
+      const value = input.value.trim();
+      if (value === '') return;
+
+      komitmen.push({ text: value, completed: false });
+      saveList();
+      renderList();
+      input.value = '';
+    }
+
+    // Initial render
+    renderList();
   </script>
-  <script>
-    // This must be **after the a-marker is in the DOM**
-    const marker = document.querySelector("a-marker");
-
-    marker.addEventListener("markerFound", () => {
-      console.log("✅ Marker detected");
-    });
-
-    marker.addEventListener("markerLost", () => {
-      console.log("❌ Marker lost");
-    });
-  </script>
-
-<script>
-  //if ("serviceWorker" in navigator) {
-    //navigator.serviceWorker.register("sw.js");
-  }
-</script>
 </body>
 </html>
